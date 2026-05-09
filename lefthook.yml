@@ -1,0 +1,15 @@
+pre-commit:
+  commands:
+    lint-fix:
+      run: pnpm lint:fix
+      stage_fixed: true
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm exec commitlint --edit {1}
+
+pre-push:
+  commands:
+    test:
+      run: pnpm test

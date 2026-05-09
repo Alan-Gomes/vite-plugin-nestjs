@@ -12,6 +12,7 @@
   },
   "type": "module",
   "scripts": {
+    "postinstall": "lefthook install",
     "build": "pnpm --filter vite-plugin-nestjs build",
     "dev:example": "pnpm --filter basic-nest dev",
     "build:example": "pnpm --filter basic-nest build",
@@ -23,7 +24,10 @@
     "format:check": "oxfmt --check"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.0.0",
+    "@commitlint/config-conventional": "^21.0.0",
     "execa": "^9.6.1",
+    "lefthook": "^2.1.6",
     "oxfmt": "^0.48.0",
     "oxlint": "^1.63.0",
     "oxlint-tsgolint": "^0.22.1",
