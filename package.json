@@ -2,14 +2,14 @@
   "name": "vite-plugin-nestjs-monorepo",
   "private": true,
   "description": "Monorepo for vite-plugin-nestjs",
+  "homepage": "https://github.com/Alan-Gomes/vite-plugin-nestjs#readme",
+  "bugs": {
+    "url": "https://github.com/Alan-Gomes/vite-plugin-nestjs/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Alan-Gomes/vite-plugin-nestjs.git"
   },
-  "bugs": {
-    "url": "https://github.com/Alan-Gomes/vite-plugin-nestjs/issues"
-  },
-  "homepage": "https://github.com/Alan-Gomes/vite-plugin-nestjs#readme",
   "type": "module",
   "scripts": {
     "build": "pnpm --filter vite-plugin-nestjs build",
