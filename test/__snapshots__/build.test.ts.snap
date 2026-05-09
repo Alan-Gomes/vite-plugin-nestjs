@@ -1,0 +1,44 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`vite build tests > SSR entry file is emitted to dist/ > SSR entry file (dist/main.js) 1`] = `
+"import { n as AppService, r as __decorate, t as AppController } from "./assets/app.controller-n_THjhtt.js";
+import "reflect-metadata";
+import { NestFactory } from "@nestjs/core";
+import { Module } from "@nestjs/common";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+//#region src/app.module.ts
+var AppModule = class AppModule {};
+AppModule = __decorate([Module({
+	controllers: [AppController],
+	providers: [AppService]
+})], AppModule);
+//#endregion
+//#region src/metadata.ts
+var metadata_default = async () => {
+	return { "@nestjs/swagger": {
+		"models": [],
+		"controllers": [[import("./assets/app.controller-Dio5_h0m.js"), { "AppController": { "getHello": {
+			summary: "This is a test",
+			description: "A greeting string",
+			type: String
+		} } }]]
+	} };
+};
+//#endregion
+//#region src/main.ts
+var app = await NestFactory.create(AppModule);
+await SwaggerModule.loadPluginMetadata(metadata_default);
+var document = SwaggerModule.createDocument(app, new DocumentBuilder().setTitle("My API").build());
+SwaggerModule.setup("apidocs", app, document);
+//#endregion
+export { app as default };
+"
+`;
+
+exports[`vite build tests > metadata.ts is written to disk by the Swagger plugin > metadata.ts 1`] = `
+"/* eslint-disable */
+export default async () => {
+    const t = {};
+    return { "@nestjs/swagger": { "models": [], "controllers": [[import("./app.controller"), { "AppController": { "getHello": { summary: "This is a test", description: "A greeting string", type: String } } }]] } };
+};"
+`;

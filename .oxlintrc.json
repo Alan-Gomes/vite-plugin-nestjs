@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["typescript", "unicorn", "oxc"],
+  "ignorePatterns": ["examples/basic-nest/src/metadata.ts"],
   "categories": {
     "correctness": "error",
     "perf": "error",
