@@ -43,5 +43,3 @@ jobs:
 
       - name: Publish
         run: pnpm publish --filter vite-plugin-nestjs --provenance --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
