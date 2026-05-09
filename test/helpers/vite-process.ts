@@ -12,7 +12,11 @@ export type BuildResult = {
 };
 
 export async function startViteDev(cwd: string): Promise<DevServer> {
-  const subprocess = execa("pnpm", ["vite"], { cwd, all: true });
+  const subprocess = execa("pnpm", ["vite"], {
+    cwd,
+    all: true,
+    env: { ...process.env, NO_COLOR: "1" },
+  });
 
   subprocess.all.pipe(process.stdout);
 
