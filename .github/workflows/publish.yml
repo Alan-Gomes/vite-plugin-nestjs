@@ -1,8 +1,11 @@
 name: Publish to npm
 
 on:
-  release:
-    types: [published]
+  # release:
+  #   types: [published]
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
