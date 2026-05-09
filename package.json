@@ -1,0 +1,39 @@
+{
+  "name": "vite-plugin-nestjs-monorepo",
+  "private": true,
+  "description": "Monorepo for vite-plugin-nestjs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Alan-Gomes/vite-plugin-nestjs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Alan-Gomes/vite-plugin-nestjs/issues"
+  },
+  "homepage": "https://github.com/Alan-Gomes/vite-plugin-nestjs#readme",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm --filter vite-plugin-nestjs build",
+    "dev:example": "pnpm --filter basic-nest dev",
+    "build:example": "pnpm --filter basic-nest build",
+    "lint": "oxlint && oxfmt --check",
+    "lint:fix": "oxlint --fix && oxfmt",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.48.0",
+    "oxlint": "^1.63.0",
+    "oxlint-tsgolint": "^0.22.1",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@scarf/scarf",
+      "esbuild"
+    ]
+  }
+}
