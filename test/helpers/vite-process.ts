@@ -67,5 +67,4 @@ export async function runViteBuild(cwd: string): Promise<BuildResult> {
 
 export async function killProcess(subprocess: ResultPromise): Promise<void> {
   subprocess.kill();
-  await subprocess.catch(() => {});
 }
