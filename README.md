@@ -2,7 +2,7 @@
 
 > Run your NestJS application through Vite — native ESM, Vite plugin ecosystem, and Swagger metadata out of the box.
 
-[![npm version](https://img.shields.io/npm/v/vite-plugin-nestjs)](https://www.npmjs.com/package/vite-plugin-nestjs)
+[![npm version](https://img.shields.io/npm/v/vite-plugin-nestjs)](https://npmx.dev/package/vite-plugin-nestjs)
 [![license](https://img.shields.io/npm/l/vite-plugin-nestjs)](./LICENSE)
 
 For usage docs, configuration reference, and examples, see the [**package README**](./packages/vite-plugin-nestjs/README.md).
