@@ -3,6 +3,6 @@ packages:
   - "examples/*"
 allowBuilds:
   "@nestjs/core": true
-  "@scarf/scarf": true
+  "@scarf/scarf": false
   esbuild: true
   lefthook: true
