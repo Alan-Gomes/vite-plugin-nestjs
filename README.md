@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=vite,nestjs&perline=2" alt="Vite and NestJS" height="64">
+</p>
+
 # vite-plugin-nestjs
 
 > Run your NestJS application through Vite — native ESM, Vite plugin ecosystem, and Swagger metadata out of the box.
