@@ -1,7 +1,7 @@
 {
   "name": "vite-plugin-nestjs",
   "version": "0.3.1",
-  "description": "Vite plugin to run NestJS with native ESM, Vite plugin ecosystem support, and automatic @nestjs/swagger metadata generation",
+  "description": "Vite plugin to run NestJS apps with ESM, any Vite plugins, and optional Swagger metadata generation.",
   "keywords": [
     "nestjs",
     "swagger",
