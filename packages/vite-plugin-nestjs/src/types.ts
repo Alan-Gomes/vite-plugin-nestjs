@@ -3,7 +3,7 @@ export function invariant<T>(value: T, message: string = "Invariant error"): Non
   return value as NonNullable<T>;
 }
 
-export class SwaggerCoordinator {
+export class AsyncCoordinator {
   private pending: Promise<void> | null = null;
   private resolvePending: (() => void) | null = null;
 

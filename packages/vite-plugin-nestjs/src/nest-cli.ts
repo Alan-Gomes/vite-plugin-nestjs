@@ -3,74 +3,57 @@ import { dirname, isAbsolute, resolve } from "node:path";
 import type {
   CompilerOptions,
   Configuration,
-  ProjectConfiguration,
 } from "@nestjs/cli/lib/configuration/configuration.js";
+import { defaultTo, isPlainObject, mergeDeep, prop } from "remeda";
 import type { ResolvedNestConfig, ResolvedSwaggerConfig } from "./types.js";
 
 function readNestCliJson(absolutePath: string): Configuration {
   if (!existsSync(absolutePath)) {
     throw new Error(`[vite-plugin-nestjs] nest-cli config not found at: ${absolutePath}`);
   }
-  let raw: string;
+  let fileText: string;
   try {
-    raw = readFileSync(absolutePath, "utf-8");
-  } catch (err) {
-    throw new Error(`[vite-plugin-nestjs] could not read ${absolutePath}`, { cause: err });
+    fileText = readFileSync(absolutePath, "utf-8");
+  } catch (error) {
+    throw new Error(`[vite-plugin-nestjs] could not read ${absolutePath}`, { cause: error });
   }
   try {
-    return JSON.parse(raw);
-  } catch (err) {
+    return JSON.parse(fileText);
+  } catch (error) {
     throw new Error(
-      `[vite-plugin-nestjs] failed to parse ${absolutePath}: ${err instanceof Error ? err.message : String(err)}`,
-      { cause: err },
+      `[vite-plugin-nestjs] failed to parse ${absolutePath}: ${error instanceof Error ? error.message : String(error)}`,
+      { cause: error },
     );
   }
 }
 
-function resolveTsconfig(opts: CompilerOptions | undefined): string {
-  if (!opts) return "tsconfig.json";
-  const { builder, tsConfigPath } = opts;
-  if (builder && typeof builder === "object" && !Array.isArray(builder)) {
-    if (
-      builder.options &&
-      "configPath" in builder.options &&
-      typeof builder.options.configPath === "string"
-    ) {
-      return builder.options.configPath;
-    }
-  }
-  return tsConfigPath ?? "tsconfig.json";
+function resolveTsconfigPath(compilerOptions: CompilerOptions | undefined): string {
+  if (!compilerOptions) return "tsconfig.json";
+
+  const { builder, tsConfigPath } = compilerOptions;
+  const configPathFromBuilder = isPlainObject(builder)
+    ? prop(builder, "options", "configPath")
+    : undefined;
+  if (configPathFromBuilder) return configPathFromBuilder;
+
+  return defaultTo(tsConfigPath, "tsconfig.json");
 }
 
-function findSwaggerPlugin(
-  plugins: CompilerOptions["plugins"],
+function resolveSwaggerPlugin(
+  plugins: CompilerOptions["plugins"] = [],
 ): { options: Record<string, unknown> } | null {
-  if (!plugins) return null;
-  for (const plugin of plugins) {
-    if (typeof plugin === "string" && plugin === "@nestjs/swagger") {
-      return { options: {} };
-    }
-    if (typeof plugin === "object" && plugin.name === "@nestjs/swagger") {
-      // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-      return { options: (plugin.options as unknown as Record<string, unknown>) ?? {} };
-    }
-  }
-  return null;
-}
+  const matched = plugins.find(
+    (compilerPlugin) =>
+      compilerPlugin === "@nestjs/swagger" ||
+      (typeof compilerPlugin === "object" && compilerPlugin.name === "@nestjs/swagger"),
+  );
 
-function mergeWithProject(
-  root: Configuration,
-  project: ProjectConfiguration | undefined,
-): ProjectConfiguration {
-  if (!project) return root;
+  if (matched === undefined) return null;
+  if (typeof matched === "string") return { options: {} };
+
   return {
-    sourceRoot: project.sourceRoot ?? root.sourceRoot,
-    entryFile: project.entryFile ?? root.entryFile,
-    compilerOptions: {
-      tsConfigPath: project.compilerOptions?.tsConfigPath ?? root.compilerOptions?.tsConfigPath,
-      builder: project.compilerOptions?.builder ?? root.compilerOptions?.builder,
-      plugins: project.compilerOptions?.plugins ?? root.compilerOptions?.plugins,
-    },
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+    options: (matched.options as unknown as Record<string, unknown>) ?? {},
   };
 }
 
@@ -80,38 +63,40 @@ export interface ResolveNestConfigOptions {
   project?: string;
 }
 
-export function resolveNestConfig(opts: ResolveNestConfigOptions): ResolvedNestConfig {
-  const { root, nestCliPath = "nest-cli.json", project } = opts;
+export function resolveNestConfig(options: ResolveNestConfigOptions): ResolvedNestConfig {
+  const { root, nestCliPath = "nest-cli.json", project: projectName } = options;
 
-  const cliAbsPath = isAbsolute(nestCliPath) ? nestCliPath : resolve(root, nestCliPath);
+  const nestCliAbsolutePath = isAbsolute(nestCliPath) ? nestCliPath : resolve(root, nestCliPath);
+  const nestCliDirectory = dirname(nestCliAbsolutePath);
+  const fileConfiguration = readNestCliJson(nestCliAbsolutePath);
 
-  const raw = readNestCliJson(cliAbsPath);
-  const cliDir = dirname(cliAbsPath);
+  const project = projectName ? fileConfiguration.projects?.[projectName] : undefined;
 
-  const effective = mergeWithProject(raw, project ? raw.projects?.[project] : undefined);
+  const mergedConfiguration = mergeDeep(fileConfiguration, project ?? {});
+  const mergedCompilerOptions = mergedConfiguration.compilerOptions;
 
-  const sourceRoot = effective.sourceRoot ?? "src";
-  const entryFile = effective.entryFile ?? "main";
-  const tsconfigRel = resolveTsconfig(effective.compilerOptions);
+  const sourceRootRelative = defaultTo(mergedConfiguration.sourceRoot, "src");
+  const entryModuleBaseName = defaultTo(mergedConfiguration.entryFile, "main");
+  const tsconfigPath = resolveTsconfigPath(mergedCompilerOptions);
 
-  const sourceRootAbs = resolve(cliDir, sourceRoot);
-  const entryAbs = resolve(sourceRootAbs, `${entryFile}.ts`);
-  const tsconfigAbs = resolve(cliDir, tsconfigRel);
+  const absoluteSourceRoot = resolve(nestCliDirectory, sourceRootRelative);
+  const absoluteEntryPath = resolve(absoluteSourceRoot, `${entryModuleBaseName}.ts`);
+  const absoluteTsconfigPath = resolve(nestCliDirectory, tsconfigPath);
 
-  const swaggerPlugin = findSwaggerPlugin(effective.compilerOptions?.plugins);
+  const swaggerPluginMatch = resolveSwaggerPlugin(mergedCompilerOptions?.plugins);
 
-  const swagger: ResolvedSwaggerConfig | null = swaggerPlugin
+  const swagger: ResolvedSwaggerConfig | null = swaggerPluginMatch
     ? {
-        outputDir: sourceRootAbs,
-        tsconfigPath: tsconfigAbs,
-        pluginOptions: swaggerPlugin.options,
+        outputDir: absoluteSourceRoot,
+        tsconfigPath: absoluteTsconfigPath,
+        pluginOptions: swaggerPluginMatch.options,
       }
     : null;
 
   return {
-    entry: entryAbs,
-    tsconfigPath: tsconfigAbs,
-    sourceRoot: sourceRootAbs,
+    entry: absoluteEntryPath,
+    tsconfigPath: absoluteTsconfigPath,
+    sourceRoot: absoluteSourceRoot,
     swagger,
   };
 }

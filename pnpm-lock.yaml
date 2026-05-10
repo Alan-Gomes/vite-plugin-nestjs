@@ -74,6 +74,10 @@ importers:
         version: link:../../packages/vite-plugin-nestjs
 
   packages/vite-plugin-nestjs:
+    dependencies:
+      remeda:
+        specifier: ^2.34.0
+        version: 2.34.0
     devDependencies:
       '@nestjs/cli':
         specifier: ^11.0.0
@@ -2393,6 +2397,9 @@ packages:
 
   reflect-metadata@0.2.2:
     resolution: {integrity: sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==}
+
+  remeda@2.34.0:
+    resolution: {integrity: sha512-zL4cEPkLHxwmlDRPyvJZjojpG5M5HXrDiABNKof+dq7kkuyQttP6NrF2uJB0DKIU09K8cTq+sQDlbo2r7mdR5Q==}
 
   require-from-string@2.0.2:
     resolution: {integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==}
@@ -4897,6 +4904,8 @@ snapshots:
   readdirp@4.1.2: {}
 
   reflect-metadata@0.2.2: {}
+
+  remeda@2.34.0: {}
 
   require-from-string@2.0.2: {}
 

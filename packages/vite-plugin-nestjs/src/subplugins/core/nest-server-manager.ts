@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { INestApplication } from "@nestjs/common";
 import type { Logger } from "vite";
-import { type SwaggerCoordinator } from "./types.js";
+import type { AsyncCoordinator } from "../../types.js";
 
 function isNestApp(v: unknown): v is INestApplication {
   return !!v && typeof v === "object" && typeof Reflect.get(v, "getHttpAdapter") === "function";
@@ -14,8 +14,12 @@ export class NestServerManager {
   constructor(
     private readonly importModule: () => Promise<unknown>,
     private readonly logger: Logger,
-    private readonly coordinator?: SwaggerCoordinator,
+    private readonly coordinators: readonly AsyncCoordinator[] = [],
   ) {}
+
+  private async waitForAllReady(): Promise<void> {
+    await Promise.all(this.coordinators.map((c) => c.waitForReady()));
+  }
 
   private async loadApp(): Promise<INestApplication> {
     let exported = await this.importModule();
@@ -58,7 +62,7 @@ export class NestServerManager {
   }
 
   async handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
-    await this.coordinator?.waitForReady();
+    await this.waitForAllReady();
 
     const app = await this.acquireApp();
     const instance = app.getHttpAdapter().getInstance();
@@ -84,7 +88,7 @@ export class NestServerManager {
 
   async start(): Promise<void> {
     try {
-      await this.coordinator?.waitForReady();
+      await this.waitForAllReady();
       await this.acquireApp();
     } catch (error: unknown) {
       this.logger.error(

@@ -1,6 +1,6 @@
 import { existsSync, watch as fsWatch } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
-import type { ResolvedSwaggerConfig, SwaggerCoordinator } from "./types.js";
+import type { AsyncCoordinator, ResolvedSwaggerConfig } from "../../types.js";
 
 const METADATA_FILENAME = "metadata.ts";
 const BUILD_TIMEOUT_MS = 30_000;
@@ -10,7 +10,7 @@ export class SwaggerMetadataManager {
 
   constructor(
     private readonly config: ResolvedSwaggerConfig,
-    private readonly coordinator: SwaggerCoordinator,
+    private readonly coordinator: AsyncCoordinator,
   ) {
     this.metadataPath = resolve(config.outputDir, METADATA_FILENAME);
   }

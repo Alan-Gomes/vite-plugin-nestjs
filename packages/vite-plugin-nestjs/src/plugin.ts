@@ -1,13 +1,11 @@
-import { type IncomingMessage, type ServerResponse } from "node:http";
-import { relative } from "node:path";
-import type { Connect, Plugin } from "vite";
-import { isRunnableDevEnvironment, normalizePath } from "vite";
-import { NestServerManager } from "./nest-server-manager.js";
+import type { Plugin, PluginOption } from "vite";
 import { resolveNestConfig } from "./nest-cli.js";
-import { SwaggerMetadataManager } from "./swagger-metadata-manager.js";
-import { SwaggerCoordinator, invariant, type NestjsPluginOptions } from "./types.js";
+import { nestjsCorePlugin } from "./subplugins/core/plugin.js";
+import { nestjsSwaggerPlugin } from "./subplugins/swagger/plugin.js";
+import { AsyncCoordinator, type NestjsPluginOptions } from "./types.js";
+import { resolve } from "node:path";
 
-export function nestjsPlugin(options: NestjsPluginOptions = {}): Plugin {
+export function nestjsPlugin(options: NestjsPluginOptions = {}): PluginOption {
   const { nestCliPath, project, exportName = "default" } = options;
 
   const config = resolveNestConfig({
@@ -16,77 +14,32 @@ export function nestjsPlugin(options: NestjsPluginOptions = {}): Plugin {
     project,
   });
 
-  const coordinator = config.swagger ? new SwaggerCoordinator() : undefined;
-  const swaggerManager = config.swagger
-    ? new SwaggerMetadataManager(config.swagger, invariant(coordinator))
-    : undefined;
+  const coordinators: AsyncCoordinator[] = [];
 
-  let nestManager: NestServerManager | undefined;
-  let command: "serve" | "build" = "serve";
+  const plugins: Plugin[] = [];
 
-  return {
-    name: "vite-plugin-nestjs",
+  let metadataPath: string | undefined;
 
-    config: () => ({
-      appType: "custom",
-      build: { ssr: config.entry, target: "node20" },
-      optimizeDeps: { noDiscovery: true },
-      resolve: { tsconfigPaths: true },
+  if (config.swagger) {
+    const swaggerCoordinator = new AsyncCoordinator();
+    coordinators.push(swaggerCoordinator);
+    metadataPath = resolve(config.sourceRoot, "metadata.ts");
+    plugins.push(
+      nestjsSwaggerPlugin({
+        swagger: config.swagger,
+        coordinator: swaggerCoordinator,
+      }),
+    );
+  }
+
+  plugins.unshift(
+    nestjsCorePlugin({
+      entry: config.entry,
+      exportName,
+      coordinators,
+      metadataPath,
     }),
+  );
 
-    configResolved(resolved) {
-      command = resolved.command;
-    },
-
-    configureServer(server) {
-      if (!isRunnableDevEnvironment(server.environments.ssr)) {
-        return () => {};
-      }
-
-      const ssr = server.environments.ssr;
-      const url = "/" + normalizePath(relative(server.config.root, config.entry));
-      nestManager = new NestServerManager(
-        () => ssr.runner.import(url).then((mod) => mod[exportName]),
-        server.config.logger,
-        coordinator,
-      );
-
-      return () => {
-        void swaggerManager?.generate();
-
-        const originalListen = server.listen.bind(server);
-        server.listen = async (...args) => {
-          await nestManager?.start();
-          const result = await originalListen(...args);
-          return result;
-        };
-
-        server.middlewares.use(
-          (req: IncomingMessage, res: ServerResponse, next: Connect.NextFunction) => {
-            if (nestManager) {
-              nestManager.handle(req, res).catch(next);
-            } else {
-              next();
-            }
-          },
-        );
-      };
-    },
-
-    handleHotUpdate({ file, server }) {
-      if (swaggerManager && file === swaggerManager.metadataPath) {
-        return [];
-      }
-      void server.restart(true);
-      return [];
-    },
-
-    async buildStart() {
-      if (command === "build") await swaggerManager?.generate();
-    },
-
-    async closeBundle() {
-      await nestManager?.close();
-    },
-  };
+  return plugins;
 }
