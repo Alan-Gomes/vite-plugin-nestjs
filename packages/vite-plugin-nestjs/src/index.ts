@@ -1,1 +1,1 @@
-export { nestjsPlugin } from "./core.js";
+export { nestjsPlugin } from "./plugin.js";

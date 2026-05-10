@@ -31,6 +31,7 @@ export function nestjsPlugin(options: NestjsPluginOptions = {}): Plugin {
       appType: "custom",
       build: { ssr: config.entry, target: "node20" },
       optimizeDeps: { noDiscovery: true },
+      resolve: { tsconfigPaths: true },
     }),
 
     configResolved(resolved) {
