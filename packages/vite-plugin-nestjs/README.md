@@ -69,7 +69,35 @@ export default app;
 }
 ```
 
-That's it. Run `vite` and your NestJS controllers are available at `http://localhost:5173`.
+That's it. Run `vite` and your NestJS controllers are available at `http://localhost:5173` — see [Development server](#development-server) for scripts, ports, and how dev mode differs from production.
+
+---
+
+## Development server
+
+Start Vite in dev mode from your Nest project root (where `vite.config.ts` and `nest-cli.json` live):
+
+```bash
+vite
+```
+
+Or add a script to `package.json`:
+
+```json
+{
+  "scripts": {
+    "dev": "vite"
+  }
+}
+```
+
+Then run `pnpm dev`, `npm run dev`, or `yarn dev`.
+
+By default the server listens on [**http://localhost:5173**](http://localhost:5173). Use Vite’s CLI to change host or port, for example `vite --port 4000`.
+
+In dev, the plugin mounts your Nest application on Vite’s HTTP server, so **do not** call `app.listen` unless `import.meta.env.PROD` is `true` (as in the Quick start example). The same process serves both Vite and your API routes.
+
+When you change source files, Vite reloads; the plugin may restart the dev server so the Nest app picks up changes.
 
 ---
 

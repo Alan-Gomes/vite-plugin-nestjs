@@ -1,0 +1,35 @@
+name: Report an issue with vite-plugin-nestjs
+description: Use this template to report issues with the library.
+labels: ["bug"]
+body:
+  - type: checkboxes
+    id: dependencies
+    attributes:
+      label: Dependencies check up
+      description: Before submitting an issue please make sure that you use latest version of the package
+      options:
+        - label: I have verified that I use latest version of vite-plugin-nestjs
+          required: true
+  - type: input
+    id: version
+    attributes:
+      placeholder: 0.0.0
+      label: What version of vite-plugin-nestjs do you have in package.json?
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      placeholder: A clear and concise description of what the bug is and how to reproduce it
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: If possible, include a link to a codesandbox with a minimal reproduction
+      description: Codesandbox template – https://codesandbox.io/p/sandbox/mantine-react-template-q4dd5d. Note that issues that cannot be reproduced will be closed.
+  - type: textarea
+    id: possibleFix
+    attributes:
+      label: Possible fix
