@@ -39,13 +39,13 @@
     "prepublishOnly": "cp ../../README.md README.md"
   },
   "dependencies": {
-    "remeda": "^2.34.0"
+    "remeda": "^2.34.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.0",
-    "@nestjs/common": "^11.0.0",
-    "@nestjs/core": "^11.0.0",
-    "@nestjs/swagger": "^11.0.0",
+    "@nestjs/common": "^11.1.21",
+    "@nestjs/core": "^11.1.21",
+    "@nestjs/swagger": "^11.4.3",
     "@types/node": "^22.0.0",
     "tsup": "^8.5.0",
     "typescript": "^6.0.3",
